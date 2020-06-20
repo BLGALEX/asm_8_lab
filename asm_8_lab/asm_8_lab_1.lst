@@ -1,0 +1,123 @@
+Microsoft (R) Macro Assembler Version 14.26.28805.0	    06/20/20 11:34:51
+proc.asm						     Page 1 - 1
+
+
+				.686
+				.model flat, C
+
+				includelib kernel32.lib
+				option casemap : none
+
+ = 00000080			string_len = 128
+				includelib msvcrt.lib
+
+				createFileA PROTO C, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+				stdHandle PROTO C, :DWORD
+				readConsoleA PROTO C, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+				writeFileA PROTO C, :DWORD, :DWORD, :DWORD, :DWORD, :DWORD
+				closeHandle PROTO C, :DWORD
+ 00000000			.data
+
+ 00000000 00000000		outHandle DWORD 0
+ 00000004 00000000		inHandle DWORD 0
+ 00000008 00000000		bytesRead DWORD 0
+ 0000000C  00000080 [		string BYTE string_len DUP(?), '0'
+	    00
+	   ] 30
+ 0000008D 74 65 78 74 2E	filename BYTE "text.txt", 0
+	   74 78 74 00
+ 00000096 00000000		fileHandle DWORD 0
+ 0000009A 00000000		bytesWritten DWORD 0
+
+				;##########
+
+				;Запись в файл с консоли
+
+ 00000000			.code
+
+ 00000000			WriteToFile PROC
+
+ 00000000  55			push ebp
+ 00000001  8B EC		mov ebp, esp
+
+				;Открываем файл
+
+				INVOKE createFileA, offset filename, 0, 0, 0, 2, 0, 0
+ 0000001C  A3 00000096 R	mov fileHandle, eax
+				;Выполняем ввод
+
+				INVOKE stdHandle, -10
+ 0000002B  A3 00000004 R	mov inHandle,eax
+
+				INVOKE readConsoleA, inHandle, addr string, 128, addr bytesRead, 0
+
+				;Записываем в открытый файл
+
+ 0000004F  A1 00000008 R	mov eax, bytesRead
+ 00000054  B3 02		mov bl, 2h
+ 00000056  F6 E3		mul bl
+				INVOKE writeFileA, fileHandle, addr string, eax, addr bytesWritten, 0
+				;Закрываем файл
+
+ 00000073  A1 0000009A R	mov eax, bytesWritten
+				INVOKE closeHandle, fileHandle
+
+ 00000086  8B E5		mov esp, ebp
+ 00000088  5D			pop ebp
+ 00000089  C3			retn
+
+ 0000008A			WriteToFile ENDP
+				END
+
+				end Main
+Microsoft (R) Macro Assembler Version 14.26.28805.0	    06/20/20 11:34:51
+proc.asm						     Symbols 2 - 1
+
+
+
+
+Segments and Groups:
+
+                N a m e                 Size     Length   Align   Combine Class
+
+FLAT . . . . . . . . . . . . . .	GROUP
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000009E Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000008A Para	  Public  'CODE'	
+
+
+Procedures, parameters, and locals:
+
+                N a m e                 Type     Value    Attr
+
+WriteToFile  . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000008A Public C
+closeHandle  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+createFileA  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+readConsoleA . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+stdHandle  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+writeFileA . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+
+
+Symbols:
+
+                N a m e                 Type     Value    Attr
+
+@CodeSize  . . . . . . . . . . .	Number	 00000000h   
+@DataSize  . . . . . . . . . . .	Number	 00000000h   
+@Interface . . . . . . . . . . .	Number	 00000001h   
+@Model . . . . . . . . . . . . .	Number	 00000007h   
+@code  . . . . . . . . . . . . .	Text   	 _TEXT
+@data  . . . . . . . . . . . . .	Text   	 FLAT
+@fardata?  . . . . . . . . . . .	Text   	 FLAT
+@fardata . . . . . . . . . . . .	Text   	 FLAT
+@stack . . . . . . . . . . . . .	Text   	 FLAT
+bytesRead  . . . . . . . . . . .	DWord	 00000008 _DATA	
+bytesWritten . . . . . . . . . .	DWord	 0000009A _DATA	
+fileHandle . . . . . . . . . . .	DWord	 00000096 _DATA	
+filename . . . . . . . . . . . .	Byte	 0000008D _DATA	
+inHandle . . . . . . . . . . . .	DWord	 00000004 _DATA	
+outHandle  . . . . . . . . . . .	DWord	 00000000 _DATA	
+string_len . . . . . . . . . . .	Number	 00000080h   
+string . . . . . . . . . . . . .	Byte	 0000000C _DATA	
+
+	   0 Warnings
+	   0 Errors
